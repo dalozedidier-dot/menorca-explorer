@@ -1,0 +1,306 @@
+<!doctype html>
+<html lang="fr" data-theme="">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
+<title>Minorque Explorer — carte interactive des plus beaux endroits de Minorque</title>
+<meta name="description" content="Carte interactive de Minorque : 95 lieux vérifiés (criques, villages, phares, patrimoine talayotique), 12 itinéraires, les 20 étapes du Camí de Cavalls, infos pratiques et planificateur de voyage." />
+<meta name="theme-color" content="#0d6a63" media="(prefers-color-scheme: light)" />
+<meta name="theme-color" content="#0e1a19" media="(prefers-color-scheme: dark)" />
+<meta property="og:title" content="Minorque Explorer" />
+<meta property="og:description" content="Les plus beaux endroits de Minorque sur une carte interactive : criques, villages, phares, Camí de Cavalls, itinéraires et planificateur de voyage." />
+<meta property="og:type" content="website" />
+
+<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Crect width='32' height='32' rx='8' fill='%230d6a63'/%3E%3Cpath d='M5 20c3-5 7-8 11-8s8 3 11 8' stroke='%23f0d8a5' stroke-width='2.4' fill='none' stroke-linecap='round'/%3E%3Ccircle cx='16' cy='11' r='2.6' fill='%23f0d8a5'/%3E%3C/svg%3E" />
+
+<link rel="preconnect" href="https://fonts.googleapis.com" />
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Fraunces:ital,opsz,wght@0,9..144,400;0,9..144,500;1,9..144,400&family=Inter:wght@400;500;600;700;800&display=swap" />
+<link rel="stylesheet" href="assets/vendor/leaflet/leaflet.css" />
+<link rel="stylesheet" href="assets/styles.css" />
+<script>
+  /* thème appliqué avant le premier rendu pour éviter tout clignotement */
+  try{var t=localStorage.getItem('menorca-theme');if(t)document.documentElement.dataset.theme=t;}catch(e){}
+</script>
+</head>
+<body data-view="carte">
+<a class="skip-link" href="#explorer">Aller à la carte</a>
+
+<!-- ══════════ EN-TÊTE ══════════ -->
+<header class="topbar" id="topbar">
+  <div class="topbar-in">
+    <a class="brand" href="#top" aria-label="Minorque Explorer — accueil">
+      <svg viewBox="0 0 1000 681" aria-hidden="true"><path id="brandPath" d="" fill="currentColor" opacity=".9"/></svg>
+      <span class="brand-txt"><strong>MINORQUE</strong><small>EXPLORER</small></span>
+    </a>
+    <nav class="mainnav" aria-label="Navigation principale">
+      <a href="#explorer">Carte</a>
+      <a href="#itineraires">Itinéraires</a>
+      <a href="#cami">Camí de Cavalls</a>
+      <a href="#pratique">Infos pratiques</a>
+      <a href="#saveurs">Saveurs &amp; culture</a>
+    </nav>
+    <div class="top-actions">
+      <button class="icon-btn" id="themeBtn" type="button" aria-label="Changer de thème" title="Thème clair / sombre">
+        <span id="themeIcon" aria-hidden="true">◐</span>
+      </button>
+      <button class="icon-btn" id="tripBtn" type="button">
+        <span aria-hidden="true">♡</span><span class="lbl">Mon voyage</span><b class="badge" id="tripCount">0</b>
+      </button>
+    </div>
+  </div>
+</header>
+
+<!-- ══════════ HERO ══════════ -->
+<section class="hero" id="top">
+  <div class="hero-media" role="img" aria-label="Cala Macarella vue depuis la falaise"></div>
+  <div class="hero-in">
+    <p class="eyebrow">Île de Minorque · Baléares · Réserve de biosphère</p>
+    <h1 class="display">Explore l’île<br><em>sans passer à côté de l’essentiel.</em></h1>
+    <p class="hero-lead">Criques turquoise, côte sauvage battue par la tramontane, villages blancs, phares et
+      un patrimoine talayotique vieux de plus de 3 000 ans — réunis sur une seule carte, avec ce qu’il faut savoir avant de partir.</p>
+    <div class="hero-cta">
+      <a class="btn btn-primary" href="#explorer">Ouvrir la carte</a>
+      <button class="btn btn-ghost" id="surpriseBtn" type="button">🎲 Surprends-moi</button>
+    </div>
+    <div class="hero-stats">
+      <div><strong id="statPlaces">0</strong><span>lieux répertoriés</span></div>
+      <div><strong id="statRoutes">0</strong><span>itinéraires</span></div>
+      <div><strong>185 km</strong><span>de Camí de Cavalls</span></div>
+      <div><strong>70 000 ha</strong><span>classés réserve de biosphère</span></div>
+    </div>
+  </div>
+  <p class="hero-credit">Photo : Cala Macarella — Paul Stephenson, CC BY 2.0, Wikimedia Commons</p>
+</section>
+
+<main>
+<!-- ══════════ EXPLORATEUR ══════════ -->
+<section class="section explorer" id="explorer" aria-labelledby="explorerTitle">
+  <div class="wrap">
+    <div class="section-head">
+      <p class="eyebrow">Carte interactive</p>
+      <h2 id="explorerTitle">Trouve ton prochain coup de cœur</h2>
+      <p>Filtre par envie, par région, par effort de marche — ou laisse le vent du jour décider à ta place.</p>
+    </div>
+
+    <div class="toolbar">
+      <div class="search" role="search">
+        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><circle cx="11" cy="11" r="7"/><path d="m20 20-3.5-3.5"/></svg>
+        <input id="q" type="search" placeholder="Rechercher une crique, un village, un phare…" autocomplete="off" aria-label="Rechercher un lieu" />
+        <button id="qClear" type="button" aria-label="Effacer la recherche">×</button>
+      </div>
+    </div>
+
+    <div class="chips" id="catChips" role="group" aria-label="Filtrer par catégorie"></div>
+
+    <div class="filters-bar">
+      <button class="filters-toggle" id="filtersToggle" type="button" aria-expanded="false" aria-controls="filtersPanel">
+        <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><path d="M3 6h18M7 12h10M10 18h4"/></svg>
+        Filtres avancés <b class="badge" id="filterCount" hidden>0</b>
+      </button>
+      <button class="reset-btn" id="resetBtn" type="button" hidden>Tout réinitialiser</button>
+    </div>
+
+    <div class="panel" id="filtersPanel">
+      <div class="panel-grid">
+        <div class="field"><span>Région</span><div class="opts" id="fRegion"></div></div>
+        <div class="field"><span>Effort d’accès</span><div class="opts" id="fEffort"></div></div>
+        <div class="field"><span>Affluence</span><div class="opts" id="fCrowd"></div></div>
+        <div class="field"><span>Ce que je cherche</span><div class="opts" id="fFlags"></div></div>
+        <div class="field"><span>Vent du jour</span><div class="opts" id="fWind"></div></div>
+      </div>
+      <p class="wind-note" id="windNote" hidden></p>
+    </div>
+
+    <div class="view-switch" role="group" aria-label="Basculer carte ou liste">
+      <button type="button" data-view="carte" aria-pressed="true">Carte</button>
+      <button type="button" data-view="liste" aria-pressed="false">Liste</button>
+    </div>
+
+    <div class="explorer-layout">
+      <aside class="list-pane" aria-label="Liste des lieux">
+        <div class="list-head">
+          <div><strong id="resultCount">0 lieu</strong> <span id="resultCtx"></span></div>
+          <select id="sortSelect" aria-label="Trier les résultats">
+            <option value="score">Incontournables</option>
+            <option value="name">A → Z</option>
+            <option value="region">Par région</option>
+            <option value="dist" disabled>Les plus proches</option>
+          </select>
+        </div>
+        <div class="place-list" id="placeList" aria-live="polite"></div>
+      </aside>
+
+      <div class="map-pane">
+        <div id="map" aria-label="Carte de Minorque"></div>
+        <div class="map-ui tl">
+          <button class="map-btn" id="fitBtn" type="button">⌖ <span>Toute l’île</span></button>
+          <button class="map-btn" id="topBtn" type="button" aria-pressed="false">★ <span>Incontournables</span></button>
+          <button class="map-btn" id="geoBtn" type="button" aria-pressed="false">📍 <span>Près de moi</span></button>
+        </div>
+        <div class="map-ui tr">
+          <div class="layer-switch" role="group" aria-label="Fond de carte">
+            <button type="button" data-layer="carte" aria-pressed="true">Carte</button>
+            <button type="button" data-layer="relief" aria-pressed="false">Relief</button>
+            <button type="button" data-layer="satellite" aria-pressed="false">Satellite</button>
+          </div>
+        </div>
+        <div class="legend" id="legend" aria-label="Légende"></div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ══════════ ITINÉRAIRES ══════════ -->
+<section class="section routes" id="itineraires" aria-labelledby="routesTitle">
+  <div class="wrap">
+    <div class="section-head">
+      <p class="eyebrow">Idées de journées</p>
+      <h2 id="routesTitle">Douze façons de lire l’île</h2>
+      <p>Chaque itinéraire s’affiche sur la carte en un clic, et s’ajoute d’un coup à ton voyage.</p>
+    </div>
+    <div class="route-filter" id="routeFilter" role="group" aria-label="Filtrer les itinéraires"></div>
+    <div class="cards-3" id="routeGrid"></div>
+  </div>
+</section>
+
+<!-- ══════════ CAMÍ DE CAVALLS ══════════ -->
+<section class="section cami" id="cami" aria-labelledby="camiTitle">
+  <svg class="cami-outline" viewBox="0 0 1000 681" aria-hidden="true"><path id="camiOutlinePath" d=""/></svg>
+  <div class="wrap">
+    <div class="cami-head">
+      <div>
+        <p class="eyebrow">GR-223 · Camí de Cavalls</p>
+        <h2 id="camiTitle" class="display">Faire le tour de Minorque à pied</h2>
+        <p>Un ancien chemin de ronde littoral, rouvert au public en 2010, qui ceinture l’île sur 185 km découpés en 20 étapes officielles.
+          Clique une étape pour la situer sur la carte, ou choisis un découpage du tour complet.</p>
+      </div>
+      <div class="cami-total">
+        <div><strong>185</strong><span>kilomètres</span></div>
+        <div><strong>20</strong><span>étapes</span></div>
+      </div>
+    </div>
+
+    <div class="plan-switch" role="group" aria-label="Découpage du tour complet">
+      <button type="button" data-plan="-1" aria-pressed="true">Les 20 étapes</button>
+    </div>
+    <div class="plan-groups" id="planGroups" hidden></div>
+    <div class="cami-grid" id="camiGrid"></div>
+    <p class="cami-note" id="camiNote"></p>
+  </div>
+</section>
+
+<!-- ══════════ PRATIQUE ══════════ -->
+<section class="section practical" id="pratique" aria-labelledby="pratiqueTitle">
+  <div class="wrap">
+    <div class="section-head">
+      <p class="eyebrow">Avant de partir</p>
+      <h2 id="pratiqueTitle">Tout ce qui change une semaine à Minorque</h2>
+      <p>Accès réglementés, vent dominant, saison, transports : les quelques informations qui évitent
+        de perdre une demi-journée devant une route barrée.</p>
+    </div>
+    <div class="acc" id="practicalGrid"></div>
+
+    <h3 class="section-head" style="margin:44px 0 14px;font-family:var(--font-display);font-weight:500;font-size:clamp(22px,3vw,30px)">
+      Le climat mois par mois
+    </h3>
+    <div class="calendar">
+      <div class="cal-legend">
+        <span><i style="background:var(--seq-4)"></i> Température moyenne de la mer (°C)</span>
+        <span><i style="background:var(--seq2-4);border-radius:50%;width:10px;height:10px"></i> Affluence ressentie (1 à 5, appréciation éditoriale)</span>
+      </div>
+      <div class="cal-grid" id="calGrid"></div>
+      <p class="cal-note" id="calNote"></p>
+      <details class="data-table">
+        <summary>Voir les données sous forme de tableau</summary>
+        <table class="cal-table" id="calTable"></table>
+      </details>
+      <p class="cal-source">Températures de l’air et jours de pluie : normales climatiques 1981-2010 de l’AEMET,
+        station « Menorca, Aeropuerto ». Températures de la mer : moyennes sur dix ans relevées à Maó.
+        L’affluence est une appréciation éditoriale, pas une mesure. Détail dans les
+        <a href="CREDITS.md">crédits</a>.</p>
+    </div>
+  </div>
+</section>
+
+<!-- ══════════ SAVEURS & CULTURE ══════════ -->
+<section class="section flavours" id="saveurs" aria-labelledby="saveursTitle">
+  <div class="wrap">
+    <div class="section-head">
+      <p class="eyebrow">Saveurs</p>
+      <h2 id="saveursTitle">Ce qui se mange et se boit ici</h2>
+      <p>Une cuisine paysanne et marine, un fromage AOP, un gin hérité des Anglais.</p>
+    </div>
+    <div class="cards-4" id="flavourGrid"></div>
+
+    <div class="section-head" style="margin:64px 0 26px">
+      <p class="eyebrow">Culture</p>
+      <h2>Fêtes, pierres et héritages</h2>
+      <p>Pourquoi l’île ressemble à ça, et pourquoi les chevaux se cabrent au milieu de la foule en juin.</p>
+    </div>
+    <div class="cards-4" id="cultureGrid"></div>
+  </div>
+</section>
+</main>
+
+<!-- ══════════ PIED DE PAGE ══════════ -->
+<footer>
+  <div class="wrap">
+    <div class="foot-grid">
+      <div class="foot-brand">
+        <strong>Minorque Explorer</strong>
+        <p>Carte indépendante et open source, pensée comme un point de départ. Les conditions d’accès,
+          horaires et restrictions changent chaque saison : vérifie toujours les sources officielles avant de partir.</p>
+      </div>
+      <div>
+        <h4>Explorer</h4>
+        <a href="#explorer">Carte interactive</a>
+        <a href="#itineraires">Itinéraires</a>
+        <a href="#cami">Camí de Cavalls</a>
+        <a href="#pratique">Infos pratiques</a>
+      </div>
+      <div>
+        <h4>Sources</h4>
+        <a href="https://www.openstreetmap.org/copyright" target="_blank" rel="noopener">© OpenStreetMap · ODbL</a>
+        <a href="https://leafletjs.com/" target="_blank" rel="noopener">Leaflet</a>
+        <a href="https://commons.wikimedia.org/" target="_blank" rel="noopener">Wikimedia Commons</a>
+        <a href="CREDITS.md">Crédits &amp; licences</a>
+      </div>
+    </div>
+    <div class="foot-bottom">
+      <span class="copyright">
+        © <span id="year">2026</span> <strong>Minorque Explorer</strong> — tous droits réservés sur les textes et le choix éditorial.
+        Code sous <a href="LICENSE">licence MIT</a>.
+        Cartographie © <a href="https://www.openstreetmap.org/copyright" target="_blank" rel="noopener">contributeurs OpenStreetMap</a> (ODbL),
+        photographies © leurs auteurs via <a href="https://commons.wikimedia.org/" target="_blank" rel="noopener">Wikimedia Commons</a> —
+        détail dans les <a href="CREDITS.md">crédits</a>.
+      </span>
+      <span class="tagline">Fait pour marcher, nager et se garer moins loin.</span>
+    </div>
+  </div>
+</footer>
+
+<!-- ══════════ MODALES ══════════ -->
+<dialog id="placeSheet" class="sheet" aria-labelledby="sheetTitle">
+  <button class="dialog-close" data-close type="button" aria-label="Fermer">×</button>
+  <div class="sheet-body" id="sheetBody"></div>
+</dialog>
+
+<dialog id="tripSheet" class="sheet sheet-wide" aria-labelledby="tripTitle">
+  <button class="dialog-close" data-close type="button" aria-label="Fermer">×</button>
+  <div class="sheet-body"><div class="sheet-in" id="tripBody"></div></div>
+</dialog>
+
+<div class="toast" id="toast" role="status" aria-live="polite"></div>
+
+<script src="assets/vendor/leaflet/leaflet.js"></script>
+<script src="data/places.js"></script>
+<script src="data/photos.js"></script>
+<script src="data/itineraries.js"></script>
+<script src="data/cami.js"></script>
+<script src="data/cami-trace.js"></script>
+<script src="data/guide.js"></script>
+<script src="data/outline.js"></script>
+<script src="assets/app.js"></script>
+</body>
+</html>
